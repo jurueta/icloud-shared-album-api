@@ -55,8 +55,6 @@ app.get('/api/album/:token/items', async (req: Request, res: Response) => {
       const page = Number(req.query.page ?? null);
       const size = Number(req.query.size ?? null);
       var photosPage: any[] = [];
-  
-      const { photos = [] } = await fetchAlbum(token);
 
       const isPageInvalid = req.query.page !== undefined && (isNaN(page) || page < 1);
       const isSizeInvalid = req.query.size !== undefined && (isNaN(size) || size < 1);
@@ -65,6 +63,8 @@ app.get('/api/album/:token/items', async (req: Request, res: Response) => {
         res.status(400).json({ error: 'Parámetros de paginación inválidos' });
         return;
       }
+
+      const { photos = [] } = await fetchAlbum(token);
 
       if (page === 0 && size === 0) {
         photosPage = photos;
