@@ -52,13 +52,26 @@ app.get('/api/album/:token', async (req: Request, res: Response) => {
 app.get('/api/album/:token/items', async (req: Request, res: Response) => {
     try {
       const { token } = req.params;
-      const page = Number(req.query.page ?? 1);
-      const size = Number(req.query.size ?? 50);
+      const page = Number(req.query.page ?? null);
+      const size = Number(req.query.size ?? null);
+      var photosPage: any[] = [];
   
       const { photos = [] } = await fetchAlbum(token);
-  
-      const start = (page - 1) * size;
-      const photosPage = photos.slice(start, start + size);
+
+      const isPageInvalid = req.query.page !== undefined && (isNaN(page) || page < 1);
+      const isSizeInvalid = req.query.size !== undefined && (isNaN(size) || size < 1);
+
+      if (isPageInvalid || isSizeInvalid) {
+        res.status(400).json({ error: 'Parámetros de paginación inválidos' });
+        return;
+      }
+
+      if (page === 0 && size === 0) {
+        photosPage = photos;
+      }else {
+        const start = (page - 1) * size;
+        photosPage = photos.slice(start, start + size);
+      }
   
       const items = photosPage.map((photo: any) => {
         const derivatives = photo.derivatives || {};
